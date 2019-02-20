@@ -3,7 +3,7 @@ import Router from './router';
 // import {observer, inject} from 'mobx-react';
 // import {computed} from 'mobx';
 // import {LocaleProvider} from 'antd';
-import 'moment/locale/zh-cn';
+// import 'moment/locale/zh-cn';
 // import zhCN from 'antd/lib/locale-provider/zh_CN';
 // import enUS from 'antd/lib/locale-provider/en_US';
 // import {IntlProvider, addLocaleData} from 'react-intl';

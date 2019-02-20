@@ -3,21 +3,20 @@ import {observer, inject} from 'mobx-react';
 
 @inject('stores')
 @observer
-class Login extends Component {
+class Home extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
+
         };
     }
 
     render() {
         return(
-            <div>
-                Login
-            </div>
+            <div>Home</div>
         );
     }
 }
 
-export default Login;
+export default Home;
