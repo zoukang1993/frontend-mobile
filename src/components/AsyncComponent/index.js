@@ -1,9 +1,9 @@
 import React from 'react';
 import {observer, inject} from 'mobx-react';
-import {computed} from 'mobx';
+// import {computed} from 'mobx';
 
 export default function asyncComponent(importComponent, hasHeader = true) {
-    // @inject('stores')
+    @inject('stores')
     @observer class AsyncComponent extends React.Component {
         constructor(props) {
             super(props);
