@@ -5,7 +5,7 @@ import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import PreviewArticle from './PreviewArticle';
-
+import {message, Icon} from 'antd';
 
 @inject('stores')
 @observer
@@ -60,17 +60,19 @@ class Articles extends Component {
     }
 
     navagatePreviewArticle = () => {
-        const value = draftToHtml(convertToRaw(this.state.editorState.getCurrentContent()));
-
+        const value = draftToHtml(convertToRaw(this.state.editorState.getCurrentContent())).trim();
+        
         if (this.isOneStage("one")) {
+            if(!this.state.title) {
+                return message.warning("title is required !");
+            }
+
             this.setState({
                 stages: 'two',
                 mainContent: value,
             });
         }
 
-        
-        console.log(value);
     }
 
     navigateEditroArticle = () => {
@@ -93,7 +95,9 @@ class Articles extends Component {
         if (this.state.stages === "one") {
             return(
                 <div className="header-wrapper">
-                    <span className="left-text" onClick={this.cancelArticle}>取消</span>
+                    <span className="left-text" onClick={this.cancelArticle}>
+                        <Icon type="left" style={{fontSize: "14px", color: '#888'}} />
+                    </span>
                     <span className="center-text">发表文章</span>
                     <span className="right-text" onClick={this.navagatePreviewArticle}>下一步</span>
                 </div>
@@ -102,7 +106,7 @@ class Articles extends Component {
             return(
                 <div className="header-wrapper">
                     <span className="left-text" onClick={this.navigateEditroArticle}>继续编辑</span>
-                    <span className="center-text">预览</span>
+                    <span className="center-text">预 览</span>
                     <span className="right-text">完成</span>
                 </div>
             );

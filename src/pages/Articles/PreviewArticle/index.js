@@ -1,27 +1,36 @@
 import React, {Component} from 'react';
-import { EditorState, ContentState } from 'draft-js';
-import htmlToDraft from 'html-to-draftjs';
-
-
 
 export default class PreviewArticle extends Component {
+    
     decodeContent = (mainContent) => {
-        const blocksFromHtml = htmlToDraft(mainContent);
-        console.log(blocksFromHtml);
-        // const { contentBlocks, entityMap } = blocksFromHtml;
-        // const contentState = ContentState.createFromBlockArray(contentBlocks, entityMap);
-        // const editorState = EditorState.createWithContent(contentState);
+        if (mainContent === '<p></p>') {
+            return(
+                <div className="preview-article-maincontent">
+                    <span className="error-warning">正文内容为空 !</span>
+                </div>
+            );
+        }
+
         return(
-            blocksFromHtml
+            <div
+                className="preview-article-maincontent"
+                dangerouslySetInnerHTML={{ __html: mainContent}}
+            />
         );
     }
 
     render() {
         const {title, mainContent} = this.props;
+        console.log(mainContent.length);
+        console.log(mainContent === "<p></p>");
 
         return (
             <div className="preview-article-page">
-                <div>{title}</div>
+                <div className="preview-article-title ellipsis">
+                    {title}
+                    <div className="preview-article-author">Silvia | 2019-01-19 </div>
+                </div>
+
                 {
                     this.decodeContent(mainContent)
                 }

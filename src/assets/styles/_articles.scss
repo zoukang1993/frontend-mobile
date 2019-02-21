@@ -1,6 +1,18 @@
 $gray-color: #7ADECA;
 $default-color: #9C9C9C;
 $border-color: #E9E9E9;
+$preview-text-color: #474747;
+
+.ellipsis {
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.error-warning {
+    color: red;
+    font-size: 12px;
+}
 
 .container {
     width: 100%;
@@ -83,6 +95,25 @@ $border-color: #E9E9E9;
 }
 
 .preview-article-page {
-    padding: 20px;
-    
+    padding: 0 20px;
+
+    .preview-article-title {
+        font-size: 34px;
+        font-weight: bolder;
+        color: $preview-text-color;
+        margin-top: 30px;
+        width: 80%;
+    }
+
+    .preview-article-author {
+        color: $preview-text-color;
+        font-size: 12px;
+        margin-top: 8px;
+    }
+
+    .preview-article-maincontent {
+        color: $preview-text-color;
+        font-size: 15px;
+        margin: 16px 0;
+    }
 }
