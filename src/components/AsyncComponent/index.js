@@ -18,7 +18,6 @@ export default function asyncComponent(importComponent, hasHeader = true) {
         // }
 
         async componentDidMount() {
-            console.log(importComponent);
             const {default: component} = await importComponent();
             // await this.userStore.setHeader(hasHeader);
 
