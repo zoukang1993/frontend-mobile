@@ -4,6 +4,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
+import PreviewArticle from './PreviewArticle';
 
 
 @inject('stores')
@@ -45,6 +46,7 @@ class Articles extends Component {
     uploadImageCallBack = (file) => {
         console.log(file);
     }
+
     isOneStage(stage) {
         if (this.state.stages === stage) {
             return true;
@@ -57,17 +59,17 @@ class Articles extends Component {
 
     }
 
-    previewArticle = () => {
+    navagatePreviewArticle = () => {
         const value = draftToHtml(convertToRaw(this.state.editorState.getCurrentContent()));
 
         if (this.isOneStage("one")) {
             this.setState({
                 stages: 'two',
+                mainContent: value,
             });
         }
 
         
-
         console.log(value);
     }
 
@@ -90,26 +92,26 @@ class Articles extends Component {
     renderHeaderCommon() {
         if (this.state.stages === "one") {
             return(
-                <div>
-                    <span onClick={this.cancelArticle}>取消</span>
-                    <span>发表文章</span>
-                    <span onClick={this.previewArticle}>下一步</span>
+                <div className="header-wrapper">
+                    <span className="left-text" onClick={this.cancelArticle}>取消</span>
+                    <span className="center-text">发表文章</span>
+                    <span className="right-text" onClick={this.navagatePreviewArticle}>下一步</span>
                 </div>
             );
         } else if (this.state.stages === "two") {
             return(
-                <div>
-                    <span onClick={this.navigateEditroArticle}>继续编辑</span>
-                    <span>预览</span>
-                    <span>完成</span>
+                <div className="header-wrapper">
+                    <span className="left-text" onClick={this.navigateEditroArticle}>继续编辑</span>
+                    <span className="center-text">预览</span>
+                    <span className="right-text">完成</span>
                 </div>
             );
         } else if (this.state.stages === "three") {
             return(
-                <div>
-                    <span>back</span>
-                    <span></span>
-                    <span>发布</span>
+                <div className="header-wrapper">
+                    <span className="left-text">back</span>
+                    <span className="center-text"></span>
+                    <span className="right-text">发布</span>
                 </div>
             );
         } else {
@@ -119,7 +121,7 @@ class Articles extends Component {
 
     renderStageOne() {
         return(
-            <div className="text-editor-area">
+            <div className="stage-one-container">
                 <input
                     type="text"
                     className="title-input"
@@ -129,15 +131,19 @@ class Articles extends Component {
                 />
                 <Editor
                     wrapperClassName="demo-wrapper"
-                    editorClassName="demo-editor"
-                    toolbarClassName="demo-toolbar-absolute"
+                    editorClassName="demo-editor editor-area"
+                    toolbarClassName="demo-toolbar-absolute toolbar-area"
                     onEditorStateChange={this.onEditorStateChange}
                     toolbar={{
                         options: [
                             "image",
+                            "inline",
+                            "blockType",
                             "fontSize",
-                            "textAlign",
+                            "history",
                             "link",
+                            "emoji",
+                            "textAlign",
                         ],
                         inline: { inDropdown: true },
                         list: { inDropdown: true },
@@ -147,21 +153,23 @@ class Articles extends Component {
                         image: { uploadCallback: this.uploadImageCallBack, alt: { present: true, mandatory: true } },
                     }}
                 />
-
-
-                <textarea
-                    disabled
-                    placeholder="area"
-                    value={this.state.editorState.getCurrentContent()}
-                />
             </div>
         );
     }
 
     renderStageTwo() {
+        if(!this.state.title || !this.state.mainContent) {
+            return(
+                <div>标题或者正文为空，请返回上一级进行编辑 ！</div>
+            );
+        }
+
         return(
             <div>
-                stage-two
+                <PreviewArticle
+                    title={this.state.title}
+                    mainContent={this.state.mainContent}
+                /> 
             </div>
         );
     }
