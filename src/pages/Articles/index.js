@@ -15,9 +15,10 @@ class Articles extends Component {
 
         this.state = {
             editorState: EditorState.createEmpty(),
-            stages: "one",
+            stages: "three",
             title: '',
             mainContent: '',
+            surfaceImage: '',
         };
     }
 
@@ -91,12 +92,36 @@ class Articles extends Component {
         }
     }
 
+    navigatePreviewArticle = () => {
+        if (this.isOneStage("three")) {
+            this.setState({
+                stages: 'two',
+            });
+        }
+    }
+
+    navigatePublishPage = () => {
+        if (this.isOneStage("two")) {
+            this.setState({
+                stages: 'three',
+            });
+        }
+    }
+
+    addArticleLabel = () => {
+
+    }
+
+    uploadSurfaceImg = () => {
+        console.log("upload surface image");
+    }
+
     renderHeaderCommon() {
         if (this.state.stages === "one") {
             return(
                 <div className="header-wrapper">
                     <span className="left-text" onClick={this.cancelArticle}>
-                        <Icon type="left" style={{fontSize: "14px", color: '#888'}} />
+                        <Icon type="left" style={{fontSize: "16px", color: '#888', fontWeight: "bold"}} />
                     </span>
                     <span className="center-text">发表文章</span>
                     <span className="right-text" onClick={this.navagatePreviewArticle}>下一步</span>
@@ -107,13 +132,15 @@ class Articles extends Component {
                 <div className="header-wrapper">
                     <span className="left-text" onClick={this.navigateEditroArticle}>继续编辑</span>
                     <span className="center-text">预 览</span>
-                    <span className="right-text">完成</span>
+                    <span className="right-text" onClick={this.navigatePublishPage}>完成</span>
                 </div>
             );
         } else if (this.state.stages === "three") {
             return(
                 <div className="header-wrapper">
-                    <span className="left-text">back</span>
+                    <span className="left-text" onClick={this.navigatePreviewArticle}>
+                        <Icon type="left" style={{fontSize: "16px", color: '#888', fontWeight: "bold"}} />
+                    </span>
                     <span className="center-text"></span>
                     <span className="right-text">发布</span>
                 </div>
@@ -179,7 +206,27 @@ class Articles extends Component {
     }
 
     renderStageThree() {
-
+        
+        return(
+            <div className="publish-article-page">
+                <div className="upload-surface-image-wrapper" onClick={this.uploadSurfaceImg}>
+                    <Icon type="upload" style={{fontSize: "32px", color: '#888', fontWeight: "bolder",}} />
+                    <div style={{fontSize: 15, color: '#9c9c9c',}}>设置文章封面</div>
+                </div>
+                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                    <Icon type="plus" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <span className="operate-text">添加标签</span>
+                </div>
+                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                    <Icon type="eye" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <span className="black-operate-text">公开发表</span>
+                </div>
+                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                    <Icon type="copyright" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <span className="black-operate-text">版权声明</span>
+                </div>
+            </div>
+        );
     }
 
     render() {

@@ -21,9 +21,7 @@ export default class PreviewArticle extends Component {
 
     render() {
         const {title, mainContent} = this.props;
-        console.log(mainContent.length);
-        console.log(mainContent === "<p></p>");
-
+        
         return (
             <div className="preview-article-page">
                 <div className="preview-article-title ellipsis">
