@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import {observer, inject} from 'mobx-react';
+import {computed} from 'mobx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import PreviewArticle from './PreviewArticle';
-import {message, Icon} from 'antd';
+import {message, Icon, Upload, Input} from 'antd';
+import uploadProps from '../../utils/uploadProps';
 
 @inject('stores')
 @observer
@@ -16,21 +18,29 @@ class Articles extends Component {
         this.state = {
             editorState: EditorState.createEmpty(),
             stages: "three",
+            tagModalVisible: false,
+
+            type: 'article',
             title: '',
             mainContent: '',
             surfaceImage: '',
+            tags: [],
         };
     }
 
-    initStatus = () => {
+    @computed get blogStore() {
+        return this.props.stores.blogStore;
+    }
 
+    initStatus = () => {
+        this.timer && clearTimeout(this.timer);
     }
 
     componentWillUnmount() {
 
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.initStatus();
     }
 
@@ -40,12 +50,27 @@ class Articles extends Component {
         });
     }
 
-    updateImage = async () => {
-
-    }
-
     uploadImageCallBack = (file) => {
         console.log(file);
+        return new Promise(
+            (resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open('POST', 'https://api.imgur.com/3/image');
+              xhr.setRequestHeader('Authorization', 'Client-ID XXXXX');
+              const data = new FormData();
+              data.append('image', file);
+              xhr.send(data);
+
+              xhr.addEventListener('load', () => {
+                const response = JSON.parse(xhr.responseText);
+                resolve(response);
+              });
+              xhr.addEventListener('error', () => {
+                const error = JSON.parse(xhr.responseText);
+                reject(error);
+              });
+            }
+          );
     }
 
     isOneStage(stage) {
@@ -108,12 +133,71 @@ class Articles extends Component {
         }
     }
 
-    addArticleLabel = () => {
+    handleAddTags = (e) => {
+        const inputVal = e.target.value || '';
 
+        const currentTag = {
+            name: inputVal,
+        };
+
+        this.timers = setTimeout(() => {
+            this.addTags(currentTag);
+        }, 1000);
     }
 
-    uploadSurfaceImg = () => {
-        console.log("upload surface image");
+    addTags = (currentTag) => {
+        this.setState({
+            tags: this.state.tags.concat(currentTag),
+        });
+    }
+
+    isPublicPublish = () => {}
+
+    copyrightNotice = () => {}
+
+    handleUpdateSurfaceImage = ({fileList}) => {
+        if(fileList.lenght > 1) {
+            return;
+        }
+
+        this.timer = setTimeout(() => {
+            let qiniuKey = fileList[0].response.key || '';
+            if (!qiniuKey) {
+                return;
+            }
+
+            const keyIndex = qiniuKey.indexOf('-');
+            if (!keyIndex) {
+                return;
+            }
+
+            const keyForNumber = qiniuKey.substring(keyIndex + 1);
+            this.setState({
+                surfaceImage: `https://file.kuipmake.com/${keyForNumber}`,
+            });
+        }, 100);
+    }
+
+    submitArticle = async() => {
+        const params = {
+            cover: this.state.surfaceImage,
+            tags: this.state.tags,
+            title: this.state.title,
+            type: this.state.type,
+            content: this.state.mainContent,
+        };
+
+        console.log("tags", this.state.tags);
+
+        // try {
+        //     const res = await this.blogStore.createArticle(params);
+
+        //     if (JSON.stringify(res) !== '{}') {
+
+        //     }
+        // } catch(e) {
+        //     throw e;
+        // }
     }
 
     renderHeaderCommon() {
@@ -142,7 +226,7 @@ class Articles extends Component {
                         <Icon type="left" style={{fontSize: "16px", color: '#888', fontWeight: "bold"}} />
                     </span>
                     <span className="center-text"></span>
-                    <span className="right-text">发布</span>
+                    <span className="right-text" onClick={this.submitArticle}>发布</span>
                 </div>
             );
         } else {
@@ -206,22 +290,29 @@ class Articles extends Component {
     }
 
     renderStageThree() {
-        
         return(
             <div className="publish-article-page">
-                <div className="upload-surface-image-wrapper" onClick={this.uploadSurfaceImg}>
-                    <Icon type="upload" style={{fontSize: "32px", color: '#888', fontWeight: "bolder",}} />
-                    <div style={{fontSize: 15, color: '#9c9c9c',}}>设置文章封面</div>
-                </div>
-                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                <Upload {...uploadProps} onChange={this.handleUpdateSurfaceImage}>
+                    <div className="upload-surface-image-wrapper">
+                        <Icon type="upload" style={{fontSize: "32px", color: '#888', fontWeight: "bolder",}} />
+                        <div style={{fontSize: 15, color: '#9c9c9c',}}>设置文章封面</div>
+                    </div>
+                </Upload>
+                <div className="operate-add-label">
                     <Icon type="plus" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
-                    <span className="operate-text">添加标签</span>
+                    <Input
+                        type="text"
+                        placeholder="添加标签"
+                        allowClear
+                        onChange={this.handleAddTags}
+                    />
                 </div>
-                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                
+                <div className="operate-add-label" onClick={this.isPublicPublish}>
                     <Icon type="eye" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
                     <span className="black-operate-text">公开发表</span>
                 </div>
-                <div className="operate-add-label" onClick={this.addArticleLabel}>
+                <div className="operate-add-label" onClick={this.copyrightNotice}>
                     <Icon type="copyright" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
                     <span className="black-operate-text">版权声明</span>
                 </div>

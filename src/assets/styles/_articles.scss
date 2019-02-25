@@ -133,7 +133,7 @@ $preview-text-color: #474747;
     }
 
     .operate-add-label {
-        height: 44px;
+        min-height: 44px;
         line-height: 44px;
         background: #fff;
         padding-left: 16px;
@@ -143,10 +143,47 @@ $preview-text-color: #474747;
             color: $default-color;
             font-size: 16px;
         }
+
+        .ant-input {
+            width: 200px;
+            margin: 0 8px 8px 0;
+        }
     }
 
     .black-operate-text {
         color: #1D1E1F;
         font-size: 16px;
+    }
+
+    .ant-upload-list {
+        margin-top: 16px;
+
+        .ant-upload-list-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 2px 16px;
+        }
+
+        img {
+            height: 50px;
+            width: 80px;
+            margin-right: 6px;
+        }
+    }
+
+    .upload-list-inline {
+        .ant-upload-list-item {
+            float: left;
+            width: 50px;
+            margin-right: 8px;
+        }
+        
+      }
+    .upload-list-inline .ant-upload-animate-enter {
+        animation-name: uploadAnimateInlineIn;
+    }
+    .upload-list-inline .ant-upload-animate-leave {
+        animation-name: uploadAnimateInlineOut;
     }
 }

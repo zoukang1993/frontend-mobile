@@ -1,8 +1,8 @@
-import {Articles} from './articles';
+import {Blog} from './blog';
 
 class Stores {
     constructor() {
-        this.articleStore = new Articles();
+        this.blogStore = new Blog();
     }
 }
 
