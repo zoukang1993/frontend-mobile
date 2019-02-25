@@ -17,7 +17,7 @@ class Articles extends Component {
 
         this.state = {
             editorState: EditorState.createEmpty(),
-            stages: "three",
+            stages: "one",
             tagModalVisible: false,
 
             type: 'article',
@@ -26,14 +26,29 @@ class Articles extends Component {
             surfaceImage: '',
             tags: [],
         };
+
+        this.uploadImageCallBack = this.uploadImageCallBack.bind(this);
     }
 
-    @computed get blogStore() {
-        return this.props.stores.blogStore;
+    @computed get articalStore() {
+        return this.props.stores.articalStore;
     }
 
     initStatus = () => {
         this.timer && clearTimeout(this.timer);
+        this.inputVal = '';
+
+        this.setState({
+            editorState: EditorState.createEmpty(),
+            stages: "one",
+            tagModalVisible: false,
+
+            type: 'article',
+            title: '',
+            mainContent: '',
+            surfaceImage: '',
+            tags: [],
+        });
     }
 
     componentWillUnmount() {
@@ -50,27 +65,41 @@ class Articles extends Component {
         });
     }
 
-    uploadImageCallBack = (file) => {
-        console.log(file);
+    uploadImage = async (file) => {
+        const uptoken = await this.articalStore.getUptoken();
+
         return new Promise(
             (resolve, reject) => {
-              const xhr = new XMLHttpRequest();
-              xhr.open('POST', 'https://api.imgur.com/3/image');
-              xhr.setRequestHeader('Authorization', 'Client-ID XXXXX');
-              const data = new FormData();
-              data.append('image', file);
-              xhr.send(data);
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'https://up.qbox.me/');
+                const data = new FormData();
+                data.append('file', file);
+                data.append('token', uptoken);
+                xhr.send(data);
 
-              xhr.addEventListener('load', () => {
-                const response = JSON.parse(xhr.responseText);
-                resolve(response);
-              });
-              xhr.addEventListener('error', () => {
-                const error = JSON.parse(xhr.responseText);
-                reject(error);
-              });
+                xhr.addEventListener('load', () => {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response);
+                }, {passive: false});
+                xhr.addEventListener('error', () => {
+                    const error = JSON.parse(xhr.responseText);
+                    reject(error);
+                }, {passive: false});
             }
-          );
+        );
+    }
+
+    async uploadImageCallBack(file) {
+        let key = '';
+
+        await this.uploadImage(file).then(function(data) {
+            key = data.key;
+        });
+
+        return {
+            data:
+                { link: 'https://file.kuipmake.com/' + key}
+        };
     }
 
     isOneStage(stage) {
@@ -82,7 +111,7 @@ class Articles extends Component {
     }
 
     cancelArticle = () => {
-
+        window.location.href = '/';
     }
 
     navagatePreviewArticle = () => {
@@ -133,50 +162,51 @@ class Articles extends Component {
         }
     }
 
-    handleAddTags = (e) => {
-        const inputVal = e.target.value || '';
+    successUploadSurfaceImg = (res, file) => {
+        if (!res.key) {
+            return;
+        }
 
-        const currentTag = {
-            name: inputVal,
-        };
-
-        this.timers = setTimeout(() => {
-            this.addTags(currentTag);
-        }, 1000);
+        this.setState({
+            surfaceImage: `https://file.kuipmake.com/${res.key}`,
+        });
     }
 
-    addTags = (currentTag) => {
+    handleAddTags = (e) => {
+        this.inputVal = e.target.value || '';
+
+        if (this.inputVal.length < 2 || this.inputVal.length > 8) {
+            return;
+        }
+    }
+
+    addTag = () => {
+        if (!this.inputVal) {
+            return;
+        }
+
+        const tagObj = {
+            name: this.inputVal,
+        }
+
         this.setState({
-            tags: this.state.tags.concat(currentTag),
+            tags: this.state.tags.concat(tagObj),
+        });
+    }
+
+    removeTag = (item) => {
+        let tags = this.state.tags;
+        let deleteIndex = tags.indexOf(item);
+        tags.splice(deleteIndex, 1);
+
+        this.setState({
+            tags: tags,
         });
     }
 
     isPublicPublish = () => {}
 
     copyrightNotice = () => {}
-
-    handleUpdateSurfaceImage = ({fileList}) => {
-        if(fileList.lenght > 1) {
-            return;
-        }
-
-        this.timer = setTimeout(() => {
-            let qiniuKey = fileList[0].response.key || '';
-            if (!qiniuKey) {
-                return;
-            }
-
-            const keyIndex = qiniuKey.indexOf('-');
-            if (!keyIndex) {
-                return;
-            }
-
-            const keyForNumber = qiniuKey.substring(keyIndex + 1);
-            this.setState({
-                surfaceImage: `https://file.kuipmake.com/${keyForNumber}`,
-            });
-        }, 100);
-    }
 
     submitArticle = async() => {
         const params = {
@@ -187,17 +217,16 @@ class Articles extends Component {
             content: this.state.mainContent,
         };
 
-        console.log("tags", this.state.tags);
+        try {
+            const res = await this.articalStore.createArticle(params);
+            if (JSON.stringify(res) !== '{}') {
+                // window.location.href = `/ArticleDetail/${res.id}`;
+            }
 
-        // try {
-        //     const res = await this.blogStore.createArticle(params);
-
-        //     if (JSON.stringify(res) !== '{}') {
-
-        //     }
-        // } catch(e) {
-        //     throw e;
-        // }
+            this.initStatus();
+        } catch(e) {
+            throw e;
+        }
     }
 
     renderHeaderCommon() {
@@ -260,14 +289,28 @@ class Articles extends Component {
                             "emoji",
                             "textAlign",
                         ],
-                        inline: { inDropdown: true },
-                        list: { inDropdown: true },
-                        textAlign: { inDropdown: false },
-                        link: { inDropdown: true },
-                        history: { inDropdown: true },
-                        image: { uploadCallback: this.uploadImageCallBack, alt: { present: true, mandatory: true } },
+                        inline: {inDropdown: true},
+                        list: {inDropdown: true},
+                        textAlign: {inDropdown: false},
+                        link: {inDropdown: true},
+                        history: {inDropdown: true},
+                        image: {
+                            uploadCallback: this.uploadImageCallBack,
+                            uploadEnabled: true,
+                            previewImage: true,
+                            urlEnabled: true,
+                            alignmentEnabled: true,
+                            alt: {present: true, mandatory: true}},
+                            defaultSize: {
+                                height: '200px',
+                                width: '240px',
+                            },
                     }}
                 />
+                {/* <textarea
+                    disabled
+                    value={draftToHtml(convertToRaw(this.state.editorState.getCurrentContent()))}
+                /> */}
             </div>
         );
     }
@@ -292,22 +335,35 @@ class Articles extends Component {
     renderStageThree() {
         return(
             <div className="publish-article-page">
-                <Upload {...uploadProps} onChange={this.handleUpdateSurfaceImage}>
+                <Upload {...uploadProps} onSuccess={this.successUploadSurfaceImg}>
                     <div className="upload-surface-image-wrapper">
                         <Icon type="upload" style={{fontSize: "32px", color: '#888', fontWeight: "bolder",}} />
                         <div style={{fontSize: 15, color: '#9c9c9c',}}>设置文章封面</div>
                     </div>
                 </Upload>
                 <div className="operate-add-label">
-                    <Icon type="plus" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <Icon type="plus" style={{color: '#979797', fontSize: 16, marginRight: "20px"}} onClick={this.addTag}  />
                     <Input
                         type="text"
+                        defaultValue=''
                         placeholder="添加标签"
                         allowClear
                         onChange={this.handleAddTags}
                     />
+
+                    <div>
+                        {
+                            this.state.tags ? this.state.tags.map((item) => {
+                                return(
+                                    <span key={item.name} className="label-show-item">
+                                        <span>{item.name}</span>
+                                        <Icon type="close" style={{marginLeft: 2, }} onClick={() => this.removeTag(item)} />
+                                    </span>
+                                )
+                            }) : ''
+                        }
+                    </div>
                 </div>
-                
                 <div className="operate-add-label" onClick={this.isPublicPublish}>
                     <Icon type="eye" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
                     <span className="black-operate-text">公开发表</span>
