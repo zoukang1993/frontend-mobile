@@ -2,6 +2,7 @@ $gray-color: #7ADECA;
 $default-color: #9C9C9C;
 $border-color: #E9E9E9;
 $preview-text-color: #474747;
+$icon-color: #d9d9d9;
 
 .ellipsis {
     overflow:hidden;
@@ -30,6 +31,10 @@ $preview-text-color: #474747;
     align-items: center;
     border-bottom: 1px solid $border-color;
     padding: 10px;
+    position: fixed;
+    width: 100%;
+    background: white;
+    z-index: 100;
 
     .left-text {
         color: #888888;
@@ -58,6 +63,7 @@ $preview-text-color: #474747;
 .stage-one-container {
     min-height: 400px;
     padding: 10px;
+    margin-top: 75px;
 
     .title-input {
         color: $default-color;
@@ -72,7 +78,6 @@ $preview-text-color: #474747;
         &::-webkit-input-placeholder {
             color: $default-color;
             font-size: 24px;
-            
         }
     }
 
@@ -96,13 +101,14 @@ $preview-text-color: #474747;
 }
 
 .preview-article-page {
-    padding: 0 20px;
+    padding: 20px;
+    margin-top: 75px;
 
     .preview-article-title {
         font-size: 34px;
         font-weight: bolder;
         color: $preview-text-color;
-        margin-top: 30px;
+        
         width: 80%;
     }
 
@@ -118,7 +124,6 @@ $preview-text-color: #474747;
         margin: 16px 0;
         display: flex;
         flex-direction: column;
-        padding: 0 16px;
 
         img {
             max-width: 94%;
@@ -134,14 +139,66 @@ $preview-text-color: #474747;
     background: #f5f5f5;
     height: 100%;
     padding: 20px 0;
+    margin-top: 75px;
+
+    .ant-upload-select {
+        display: inherit;
+    }
 
     .upload-surface-image-wrapper {
         width: 300px;
         height: 160px;
-        padding-top: 50px;
         text-align: center;
         border: 1px dashed #D9D9D9;
         margin: 0 auto;
+        position: relative;
+        background: #f5f5f5;
+        border-radius: 4px;
+        padding: 4px 12px;
+        overflow: hidden;
+        color: $icon-color;
+        text-decoration: none;
+        text-indent: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .upload-text-icon {
+           font-size: 1rem;
+           color: $icon-color; 
+        }
+
+        .upload-surface-input {
+            position: absolute;
+            font-size: 100px;
+            right: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        &::hover {
+            background: #AADFFD;
+            border-color: #78C3F3;
+            color: #004974;
+            text-decoration: none;
+        }
+    }
+
+    .surface-image-show-area {
+        display: flex;
+        padding: 0 40px;
+        margin: 16px 0;
+
+        .surface-image-show {
+            width: 50px;
+            height: 40px;
+            border-radius: 8px;
+            justify-content: flex-start
+        }
+
+        .remove-surface-image-icon {
+            margin: 10px;
+        }
     }
 
     .operate-add-label {
@@ -151,6 +208,21 @@ $preview-text-color: #474747;
         padding-left: 16px;
         margin-top: 10px;
 
+        .label-input {
+            color: $default-color;
+            height: 30px;
+            border: 1px solid $border-color;
+            font-size: 16px;
+            width: 80%;
+            padding-left: 10px;
+
+            &::-webkit-input-placeholder {
+                color: $default-color;
+                font-size: 16px;
+                
+            }
+        }
+
         .operate-text {
             color: $default-color;
             font-size: 16px;
@@ -159,6 +231,10 @@ $preview-text-color: #474747;
         .ant-input {
             width: 200px;
             margin: 0 8px 8px 0;
+        }
+
+        .ant-input-affix-wrapper {
+            display: initial;
         }
     }
 
@@ -177,7 +253,7 @@ $preview-text-color: #474747;
     }
 
     .ant-upload-list {
-        margin-top: 16px;
+        padding: 1rem;
 
         .ant-upload-list-item {
             display: flex;
@@ -188,7 +264,7 @@ $preview-text-color: #474747;
 
         img {
             height: 50px;
-            width: 80px;
+            width: 60px;
             margin-right: 6px;
         }
     }
@@ -196,15 +272,40 @@ $preview-text-color: #474747;
     .upload-list-inline {
         .ant-upload-list-item {
             float: left;
-            width: 50px;
+            width: 70px;
             margin-right: 8px;
         }
-        
-      }
+    }
+
     .upload-list-inline .ant-upload-animate-enter {
         animation-name: uploadAnimateInlineIn;
     }
     .upload-list-inline .ant-upload-animate-leave {
         animation-name: uploadAnimateInlineOut;
+    }
+}
+
+.icon {
+    &.icon-shangchuan,
+    &.icon-add,
+    &.icon-gongkai,
+    &.icon-banquan {
+        color: $default-color;
+    }
+
+    &.icon-shangchuan {
+        font-size: 2rem;
+    }
+
+    &.icon-shanchu {
+        margin-left: 6px;
+    }
+
+    &.icon-add,
+    &.icon-gongkai,
+    &.icon-banquan {
+        font-size: 18px;
+        margin-right: 20px;
+        margin-top: 8px;
     }
 }

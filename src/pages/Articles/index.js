@@ -6,8 +6,8 @@ import { Editor } from 'react-draft-wysiwyg';
 import { EditorState, convertToRaw } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import PreviewArticle from './PreviewArticle';
-import {message, Icon, Upload, Input} from 'antd';
-import uploadProps from '../../utils/uploadProps';
+import './index.scss';
+import {Link} from 'react-router-dom';
 
 @inject('stores')
 @observer
@@ -19,7 +19,6 @@ class Articles extends Component {
             editorState: EditorState.createEmpty(),
             stages: "one",
             tagModalVisible: false,
-
             type: 'article',
             title: '',
             mainContent: '',
@@ -28,6 +27,7 @@ class Articles extends Component {
         };
 
         this.uploadImageCallBack = this.uploadImageCallBack.bind(this);
+        this.fileInput = React.createRef();
     }
 
     @computed get articalStore() {
@@ -52,10 +52,10 @@ class Articles extends Component {
     }
 
     componentWillUnmount() {
-
+        this.initStatus();
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.initStatus();
     }
 
@@ -110,16 +110,12 @@ class Articles extends Component {
         return false;
     }
 
-    cancelArticle = () => {
-        window.location.href = '/';
-    }
-
     navagatePreviewArticle = () => {
         const value = draftToHtml(convertToRaw(this.state.editorState.getCurrentContent())).trim();
         
         if (this.isOneStage("one")) {
             if(!this.state.title) {
-                return message.warning("title is required !");
+                return;
             }
 
             this.setState({
@@ -127,7 +123,6 @@ class Articles extends Component {
                 mainContent: value,
             });
         }
-
     }
 
     navigateEditroArticle = () => {
@@ -172,6 +167,26 @@ class Articles extends Component {
         });
     }
 
+    uploadSurfaceImage = async (event) => {
+        event.preventDefault();
+        let file = this.fileInput.current.files[0];
+        let {key} = await await this.uploadImage(file);
+
+        if (!key) {
+            return;
+        }
+
+        this.setState({
+            surfaceImage: 'https://file.kuipmake.com/' + key,
+        });
+    }
+
+    removeSurfaceImage = () => {
+        this.setState({
+            surfaceImage: '',
+        });
+    }
+
     handleAddTags = (e) => {
         this.inputVal = e.target.value || '';
 
@@ -189,14 +204,27 @@ class Articles extends Component {
             name: this.inputVal,
         }
 
+        let index = this.findLabelInArray(tagObj);
+        if (index >= 0) {
+            return;
+        }
+
         this.setState({
             tags: this.state.tags.concat(tagObj),
         });
+
+        this.inputVal = '';
+    }
+
+    findLabelInArray(itemObj) {
+        let tags = this.state.tags;
+        let index = tags.indexOf(itemObj);
+        return index;
     }
 
     removeTag = (item) => {
         let tags = this.state.tags;
-        let deleteIndex = tags.indexOf(item);
+        let deleteIndex = this.findLabelInArray(item);
         tags.splice(deleteIndex, 1);
 
         this.setState({
@@ -209,6 +237,10 @@ class Articles extends Component {
     copyrightNotice = () => {}
 
     submitArticle = async() => {
+        if (!this.state.surfaceImage || !this.state.title || !this.state.type || !this.state.mainContent) {
+            return;
+        }
+
         const params = {
             cover: this.state.surfaceImage,
             tags: this.state.tags,
@@ -219,10 +251,10 @@ class Articles extends Component {
 
         try {
             const res = await this.articalStore.createArticle(params);
+            
             if (JSON.stringify(res) !== '{}') {
-                // window.location.href = `/ArticleDetail/${res.id}`;
+                this.props.history.replace(`/ArticleDetail/${res.id}`);
             }
-
             this.initStatus();
         } catch(e) {
             throw e;
@@ -233,9 +265,11 @@ class Articles extends Component {
         if (this.state.stages === "one") {
             return(
                 <div className="header-wrapper">
-                    <span className="left-text" onClick={this.cancelArticle}>
-                        <Icon type="left" style={{fontSize: "16px", color: '#888', fontWeight: "bold"}} />
-                    </span>
+                    <Link to='/' className="left-text">
+                        <svg className="icon icon-fanhui" aria-hidden="true">
+                            <use xlinkHref="#icon-fanhui"></use>
+                        </svg>
+                    </Link>
                     <span className="center-text">发表文章</span>
                     <span className="right-text" onClick={this.navagatePreviewArticle}>下一步</span>
                 </div>
@@ -252,7 +286,9 @@ class Articles extends Component {
             return(
                 <div className="header-wrapper">
                     <span className="left-text" onClick={this.navigatePreviewArticle}>
-                        <Icon type="left" style={{fontSize: "16px", color: '#888', fontWeight: "bold"}} />
+                        <svg className="icon icon-fanhui" aria-hidden="true">
+                            <use xlinkHref="#icon-fanhui"></use>
+                        </svg>
                     </span>
                     <span className="center-text"></span>
                     <span className="right-text" onClick={this.submitArticle}>发布</span>
@@ -274,6 +310,7 @@ class Articles extends Component {
                     placeholder="title"
                 />
                 <Editor
+                    editorState={this.state.editorState}
                     wrapperClassName="demo-wrapper"
                     editorClassName="demo-editor editor-area"
                     toolbarClassName="demo-toolbar-absolute toolbar-area"
@@ -335,29 +372,58 @@ class Articles extends Component {
     renderStageThree() {
         return(
             <div className="publish-article-page">
-                <Upload {...uploadProps} onSuccess={this.successUploadSurfaceImg}>
-                    <div className="upload-surface-image-wrapper">
-                        <Icon type="upload" style={{fontSize: "32px", color: '#888', fontWeight: "bolder",}} />
-                        <div style={{fontSize: 15, color: '#9c9c9c',}}>设置文章封面</div>
+                <div className="upload-surface-image-wrapper">
+                    <div className="upload-text-icon">
+                        <svg className="icon icon-shangchuan" aria-hidden="true">
+                            <use xlinkHref="#icon-shangchuan"></use>
+                        </svg> <br />
+                        <span>设置文章封面</span>
                     </div>
-                </Upload>
+                    <input
+                        className="upload-surface-input"
+                        type="file"
+                        onChange={this.uploadSurfaceImage}
+                        ref={this.fileInput}
+                    />
+                </div>
+                <div>
+                    {
+                        this.state.surfaceImage ? 
+                            <div className="surface-image-show-area">
+                                <img src={this.state.surfaceImage} className="image" alt="封面图" className="surface-image-show" /> 
+                                <span onClick={this.removeSurfaceImage} className="remove-surface-image-icon">
+                                    <svg className="icon icon-shanchu" aria-hidden="true">
+                                        <use xlinkHref="#icon-shanchu"></use>
+                                    </svg>
+                                </span>
+                            </div>
+                        : ''
+                    }
+                </div>
                 <div className="operate-add-label">
-                    <Icon type="plus" style={{color: '#979797', fontSize: 16, marginRight: "20px"}} onClick={this.addTag}  />
-                    <Input
+                    <span onClick={this.addTag}>
+                        <svg className="icon icon-add" aria-hidden="true">
+                            <use xlinkHref="#icon-add"></use>
+                        </svg>
+                    </span>
+                    <input
                         type="text"
+                        className="label-input"
                         defaultValue=''
                         placeholder="添加标签"
-                        allowClear
                         onChange={this.handleAddTags}
                     />
-
                     <div>
                         {
                             this.state.tags ? this.state.tags.map((item) => {
                                 return(
                                     <span key={item.name} className="label-show-item">
                                         <span>{item.name}</span>
-                                        <Icon type="close" style={{marginLeft: 2, }} onClick={() => this.removeTag(item)} />
+                                        <span onClick={() => this.removeTag(item)}>
+                                            <svg className="icon icon-shanchu" aria-hidden="true">
+                                                <use xlinkHref="#icon-shanchu"></use>
+                                            </svg>
+                                        </span>
                                     </span>
                                 )
                             }) : ''
@@ -365,11 +431,17 @@ class Articles extends Component {
                     </div>
                 </div>
                 <div className="operate-add-label" onClick={this.isPublicPublish}>
-                    <Icon type="eye" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <span onClick={this.isPublicPublish}>
+                        <svg className="icon icon-gongkai" aria-hidden="true">
+                            <use xlinkHref="#icon-gongkai"></use>
+                        </svg>
+                    </span>
                     <span className="black-operate-text">公开发表</span>
                 </div>
                 <div className="operate-add-label" onClick={this.copyrightNotice}>
-                    <Icon type="copyright" style={{color: '#979797', fontSize: 16, marginRight: "20px"}}  />
+                    <svg className="icon icon-banquan" aria-hidden="true">
+                        <use xlinkHref="#icon-banquan"></use>
+                    </svg>
                     <span className="black-operate-text">版权声明</span>
                 </div>
             </div>
