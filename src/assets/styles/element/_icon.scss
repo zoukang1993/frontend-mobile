@@ -1,0 +1,71 @@
+$icon-font-family: 'iconfont';
+
+@font-face {
+    font-family: 'iconfont';  /* project id 1054157 */
+    src: url('//at.alicdn.com/t/font_1054157_1kfccca8jam.eot');
+    src: url('//at.alicdn.com/t/font_1054157_1kfccca8jam.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_1054157_1kfccca8jam.woff2') format('woff2'),
+    url('//at.alicdn.com/t/font_1054157_1kfccca8jam.woff') format('woff'),
+    url('//at.alicdn.com/t/font_1054157_1kfccca8jam.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_1054157_1kfccca8jam.svg#iconfont') format('svg');
+  }
+
+.icon-symbol {
+   width: 1em; height: 1em;
+   vertical-align: -0.15em;
+   fill: currentColor;
+   overflow: hidden;
+}
+
+.icon {
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: .2px;
+    cursor: pointer;
+    font-family: $icon-font-family;
+    font-style: normal;
+}
+
+$icon: (
+    article: '\e75e',
+    collect: '\e61a',
+    comment: '\e601',
+    forward: '\e767',
+    give-a-like: '\e64d',
+    address: '\e61f',
+    back: '\e602',
+);
+
+@each $key, $value in $icon {
+    .icon-#{$key} {
+        &::before {
+            content: $value;
+        }
+    }
+}
+
+.loading {
+    display: inline-block;
+    -webkit-animation: loading-rotate  2s infinite linear;
+    animation: loading-rotate  2s infinite linear;
+}
+
+@keyframes loading-rotate {
+    from {
+        transform: rotateZ(0deg);
+    }
+
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+
+@-webkit-keyframes loading-rotate {
+    from {
+        -webkit-transform: rotateZ(0deg);
+    }
+
+    to {
+        -webkit-transform: rotateZ(360deg);
+    }
+}
